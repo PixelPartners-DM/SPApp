@@ -1,0 +1,75 @@
+/* ===== OVERSKRIFT ===== */
+h1 {
+    text-align: center;
+    margin: 40px 0 24px;
+    font-size: 38px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+/* ===== LOGIN BOX ===== */
+.login-box {
+    width: 360px;
+    margin: 0 auto;
+    padding: 28px;
+    background: #1a1a1a;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+/* ===== FORM ===== */
+.form-group {
+    margin-bottom: 18px;
+}
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #e5e5e5;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 14px;
+        border-radius: 10px;
+        border: 1px solid #444;
+        background: #111;
+        color: #ffffff;
+        font-size: 15px;
+        box-sizing: border-box;
+    }
+
+        .form-group input::placeholder {
+            color: #888;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+/* ===== BUTTON ===== */
+button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    background: #2a2a2a;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+    button:hover {
+        background: #3a3a3a;
+    }
+
+/* ===== MESSAGE ===== */
+p {
+    margin-top: 14px;
+    text-align: center;
+    color: #cccccc;
+}
