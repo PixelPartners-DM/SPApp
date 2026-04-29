@@ -1,61 +1,102 @@
 ﻿@page "/login"
 
-
+@inject PixelPalApp.Services.ApiService Api
+@inject NavigationManager NavigationManager
+@using Microsoft.Maui.Storage
 
 <h1>Login</h1>
-
 
 <!-- Container til hele login boksen -->
 <div class="login-box">
 
     <!-- Email felt -->
-    <div class=" form-group">
+    <div class="form-group">
         <label>Email</label>
-        <!-- @bind kobler input til variablen "email" -->
         <input @bind="email" type="email" placeholder="Type your email" />
     </div>
 
     <!-- Password felt -->
-  <div class=" form-group">
+    <div class="form-group">
         <label>Password</label>
-        <!-- type="password" skjuler teksten -->
         <input @bind="password" type="password" placeholder="Type your password" />
     </div>
 
-    <!-- Knap som kalder HandleLogin() -->
+    <!-- Login knap -->
     <button @onclick="HandleLogin">Log in</button>
 
+    <!-- Opret bruger knap -->
+    <button @onclick="GoToCreateUser">
+        Opret bruger
+    </button>
 
-@if (!string.IsNullOrEmpty(message))
-{
-    <p>@message</p>
-}
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <p>@message</p>
+    }
 
 </div>
 
 @code {
-    // Variabler til input felterne
+
+    // Input felter
     private string email = "";
     private string password = "";
 
-    // Bruges til fejl/feedback til bruger
+    // Fejl/success besked
     private string message = "";
 
-    // Metode der kører når man klikker på knappen
-    private void HandleLogin()
+    // Login metode
+    private async Task HandleLogin()
     {
+        message = "";
 
         // Tjek om felter er tomme
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        if (string.IsNullOrWhiteSpace(email) ||
+            string.IsNullOrWhiteSpace(password))
         {
-            message = "Type email and password .";
+            message = "Type email and password.";
             return;
         }
 
-        // Fake login besked
-        message = $"Welcome, {email}!";
+        try
+        {
+            // Kald API login
+            var result = await Api.LoginAsync(email.Trim(), password);
+
+            // Hvis login fejler
+            if (result == null || string.IsNullOrWhiteSpace(result.Token))
+            {
+                message = "Forkert email eller password.";
+                return;
+            }
+
+            // Gem JWT token
+            await SecureStorage.SetAsync("jwt_token", result.Token);
+
+            // Gem rolle
+            await SecureStorage.SetAsync("user_role", result.Role);
+
+            message = "Login successful!";
+
+            // Navigation baseret på rolle
+            if (result.Role == "Admin")
+            {
+                NavigationManager.NavigateTo("/admin");
+            }
+            else
+            {
+                NavigationManager.NavigateTo("/userpage");
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"Fejl: {ex.Message}";
+        }
+    }
+
+    // Naviger til opret bruger side
+    private void GoToCreateUser()
+    {
+        NavigationManager.NavigateTo("/createuser");
     }
 }
-
-
-

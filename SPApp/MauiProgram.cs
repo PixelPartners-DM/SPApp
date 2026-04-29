@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using PixelPalApp.Services;
 
 namespace SPApp
 {
@@ -7,6 +8,7 @@ namespace SPApp
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
+
             builder
                 .UseMauiApp<App>()
                 .ConfigureFonts(fonts =>
@@ -17,9 +19,17 @@ namespace SPApp
             builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
-    		builder.Services.AddBlazorWebViewDeveloperTools();
-    		builder.Logging.AddDebug();
+            builder.Services.AddBlazorWebViewDeveloperTools();
+            builder.Logging.AddDebug();
 #endif
+
+            builder.Services.AddScoped(sp =>
+                new HttpClient
+                {
+                    BaseAddress = new Uri("http://pixelwebsiteapi.duckdns.org:5000/")
+                });
+
+            builder.Services.AddScoped<ApiService>();
 
             return builder.Build();
         }

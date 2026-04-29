@@ -1,0 +1,105 @@
+﻿@page "/createuser"
+
+@inject PixelPalApp.Services.ApiService Api
+@inject NavigationManager NavigationManager
+
+<h1>Opret bruger</h1>
+
+<div class="login-box">
+
+    <div class="form-group">
+        <label>Fulde navn</label>
+        <input @bind="fullName" placeholder="Dit navn" />
+    </div>
+
+    <div class="form-group">
+        <label>Email</label>
+        <input @bind="email" type="email" placeholder="Din email" />
+    </div>
+
+    <div class="form-group">
+        <label>Password</label>
+        <input @bind="password" type="password" placeholder="Vælg password" />
+    </div>
+
+    <div class="form-group">
+        <label>Telefonnummer</label>
+        <input @bind="phoneNumber" placeholder="Dit telefonnummer" />
+    </div>
+
+    <div class="form-group">
+        <label>Adresse</label>
+        <input @bind="address" placeholder="Din adresse" />
+    </div>
+
+    <button @onclick="HandleCreateUser">
+        Opret bruger
+    </button>
+
+    <button @onclick="GoToLogin">
+        Tilbage til login
+    </button>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <p>@message</p>
+    }
+
+</div>
+
+@code {
+
+    private string fullName = "";
+    private string email = "";
+    private string password = "";
+    private string phoneNumber = "";
+    private string address = "";
+    private string message = "";
+
+    // Opret bruger
+    private async Task HandleCreateUser()
+    {
+        message = "";
+
+        // Tjek om felter mangler
+        if (string.IsNullOrWhiteSpace(fullName) ||
+            string.IsNullOrWhiteSpace(email) ||
+            string.IsNullOrWhiteSpace(password))
+        {
+            message = "Navn, email og password skal udfyldes.";
+            return;
+        }
+
+        // Opret DTO objekt
+        var newUser = new SPApp.Dto.CreateUserDto
+        {
+            FullName = fullName,
+            Email = email.Trim(),
+            PasswordHash = password,
+            PhoneNumber = phoneNumber,
+            Address = address
+        };
+
+        // Kald API
+        var result = await Api.CreateUserAsync(newUser);
+
+        // Hvis API returnerer fejl
+        if (result != "OK")
+        {
+            message = result;
+            return;
+        }
+
+        // Success
+        message = "Bruger oprettet!";
+
+        // Gå tilbage til login
+        NavigationManager.NavigateTo("/login");
+    }
+
+    // Tilbage til login
+    private void GoToLogin()
+    {
+        NavigationManager.NavigateTo("/login");
+    }
+}
