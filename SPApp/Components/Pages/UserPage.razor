@@ -1,7 +1,60 @@
 ﻿@page "/userpage"
+@using SPApp.Dto
+@inject PixelPalApp.Services.ApiService Api
+@inject NavigationManager NavigationManager
 
 <h3>UserPage</h3>
 
-@code {
+@if(isLoading)
+{
+    <p>Loading current user...</p>
+}
+else if(!string.IsNullOrEmpty(message))
+{
+    <p>@message</p>
+}
+else if(user == null)
+{
+    <p>No user is logged in.</p>
+    <button @onclick="GoToLogin">Go to Login</button>
+}
+else
+{
+    <div class="user-info">
+        <p>ID: @user.UserId</p>
+        <p>Velkommen!, @user.FullName!</p>
+        <p>Email: @user.Email</p>
+        <p>Telefonnummer: @user.PhoneNumber</p>
+        <p>Adresse: @user.Address</p>
+    </div>
+}
 
+@code {
+        private UserDto user;
+    private bool isLoading = true;
+    private string message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        message = null;
+
+        try
+        {
+            user = await Api.GetCurrentUserAsync();
+        }
+        catch (Exception ex)
+        {
+            message = "Error loading user data.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void GoToLogin()
+    {
+        NavigationManager.NavigateTo("/login");
+    }
 }
