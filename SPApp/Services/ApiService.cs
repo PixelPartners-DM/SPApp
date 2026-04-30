@@ -207,5 +207,90 @@ namespace PixelPalApp.Services
                 return false;
             }
         }
+
+        //Product
+
+        public async Task<List<ProductDto>?> GetProductsAsync()
+        {
+            try
+            {
+                Console.WriteLine($"GET: {_httpClient.BaseAddress}api/Product");
+                var response = await _httpClient.GetAsync("api/Product");
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Status: {response.StatusCode}");
+                Console.WriteLine($"Body: {content}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+                return await response.Content.ReadFromJsonAsync<List<ProductDto>>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GET PRODUCTS EXCEPTION");
+                Console.WriteLine(ex.ToString());
+                return null;
+            }
+        }
+
+        //Product images
+        public async Task<List<ProductImageDto>?> GetProductImagesAsync(int productId)
+        {
+            try
+            {
+                Console.WriteLine($"GET: {_httpClient.BaseAddress}api/Product/{productId}/images");
+                var response = await _httpClient.GetAsync($"api/Product/{productId}/images");
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Status: {response.StatusCode}");
+                Console.WriteLine($"Body: {content}");
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+                return await response.Content.ReadFromJsonAsync<List<ProductImageDto>>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GET PRODUCT IMAGES EXCEPTION");
+                Console.WriteLine(ex.ToString());
+                return null;
+            }
+        }
+
+
+        //Orders
+        public async Task<OrderResponseDto?> CreateOrderAsync(OrderRequestDto order)
+        {
+            try
+            {
+                var token = await SecureStorage.GetAsync("jwt_token");
+                if (string.IsNullOrWhiteSpace(token))
+                {
+                    Console.WriteLine("Create order failed: no JWT token.");
+                    return null;
+                }
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
+
+                Console.WriteLine($"POST: {_httpClient.BaseAddress}api/Orders");
+                var response = await _httpClient.PostAsJsonAsync("api/Orders", order);
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Status: {response.StatusCode}");
+                Console.WriteLine($"Body: {content}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+                return await response.Content.ReadFromJsonAsync<OrderResponseDto>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("CREATE ORDER EXCEPTION");
+                Console.WriteLine(ex.ToString());
+                return null;
+            }
+        }
     }
 }

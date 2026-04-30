@@ -26,6 +26,8 @@ else
         <p>Email: @user.Email</p>
         <p>Telefonnummer: @user.PhoneNumber</p>
         <p>Adresse: @user.Address</p>
+
+        <button @onclick="GoToProducts">Browse products</button>
     </div>
 }
 
@@ -56,5 +58,10 @@ else
     private void GoToLogin()
     {
         NavigationManager.NavigateTo("/login");
+    }
+
+    private void GoToProducts()
+    {
+        NavigationManager.NavigateTo("/products");
     }
 }

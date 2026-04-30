@@ -1,0 +1,119 @@
+﻿@page "/products"
+@using SPApp.Dto
+@inject PixelPalApp.Services.ApiService Api
+@inject PixelPalApp.Services.CartService Cart
+@inject NavigationManager NavigationManager
+
+<h3>Products</h3>
+
+@if (isLoading)
+{
+    <p>Loading products...</p>
+}
+else if (!string.IsNullOrEmpty(message))
+{
+    <p>@message</p>
+}
+else if (products == null || !products.Any())
+{
+    <p>No products found.</p>
+}
+else
+{
+    <div class="products">
+        @foreach (var p in products)
+        {
+            <div class="product-card">
+                <h3>@p.ProductName</h3>
+
+                @if (p.ImageUrls != null && p.ImageUrls.Any())
+                {
+                    <div class="product-images">
+                        @foreach (var imageUrl in p.ImageUrls)
+                        {
+                            <img src="@imageUrl" alt="@p.ProductName" style="max-width:120px;max-height:120px;margin-right:8px" />
+                        }
+                    </div>
+                }
+
+                <p>Price: @p.Price.ToString("C")</p>
+
+                <div>
+                    <button @onclick="() => AddToCart(p)">Add to cart</button>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<button @onclick="GoToUserPage">Back to profile</button>
+
+@code {
+    private List<ProductDto> products = new();
+    private bool isLoading = true;
+    private string? message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        message = null;
+
+        try
+        {
+            var result = await Api.GetProductsAsync();
+            if (result == null)
+            {
+                message = "Failed to load products.";
+            }
+            else
+            {
+                products = result;
+
+                foreach (var p in products)
+
+                    try
+                    {
+                        var images = await Api.GetProductImagesAsync(p.ProductId);
+                        if (images != null && images.Any())
+                        {
+                            p.ImageUrls = images.Select(i => i.ImageUrl).ToList();
+                        }
+                        else
+                        {
+                            p.ImageUrls = new List<string>();
+                        }
+                    }
+                    catch
+                    {
+                        p.ImageUrls = new List<string>();
+                    }
+            }
+        }
+        catch (Exception ex)
+        {
+            message = "Error loading products.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void GoToUserPage()
+    {
+        NavigationManager.NavigateTo("/userpage");
+    }
+
+    private void AddToCart(ProductDto? product)
+    {
+        if (product == null)return;
+        Cart.AddProduct(new SPApp.Dto.ProductDto
+        {
+            ProductId = product.ProductId,
+            ProductName = product.ProductName,
+            Price = product.Price,
+            CategoryId = product.CategoryId,
+            ImageUrls = product.ImageUrls
+        });
+    }
+}
