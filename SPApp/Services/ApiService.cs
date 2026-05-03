@@ -273,6 +273,10 @@ namespace PixelPalApp.Services
                 _httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);
 
+                //Log serialized request
+                var json = System.Text.Json.JsonSerializer.Serialize(order);
+                Console.WriteLine("CreateOrder payload: " + json);
+
                 Console.WriteLine($"POST: {_httpClient.BaseAddress}api/Orders");
                 var response = await _httpClient.PostAsJsonAsync("api/Orders", order);
                 var content = await response.Content.ReadAsStringAsync();

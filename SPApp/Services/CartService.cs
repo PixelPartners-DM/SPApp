@@ -11,45 +11,96 @@ namespace PixelPalApp.Services
     public class CartService
     {
         private readonly List<CartItemDto> _Items = new();
-        public IReadOnlyList<CartItemDto> GetItems() => _Items.AsReadOnly();
+        private readonly object _sync = new();
+        public event Action? CartChanged;
+
+        public IReadOnlyList<CartItemDto> GetItems()
+        {
+            lock (_sync)
+            {
+                return _Items.Select(i => new CartItemDto
+                {
+                    ProductId = i.ProductId,
+                    ProductName = i.ProductName,
+                    Price = i.Price,
+                    Quantity = i.Quantity
+                }).ToList().AsReadOnly();
+            }
+        }
+
+        public int GetCount()
+        {
+            lock (_sync) { return _Items.Count; }
+        }
+
+        public bool Contains(int productId)
+        {
+            lock (_sync) { return _Items.Any(i => i.ProductId == productId); }
+        }
+
         public void AddProduct(ProductDto product, int quantity = 1)
         {
             if (product == null || quantity <= 0) return;
 
-            var existing = _Items.FirstOrDefault(i => i.ProductId == product.ProductId);
-            if (existing != null)
+            lock (_sync)
             {
-                existing.Quantity += quantity;
-            }
-            else
-            {
-                _Items.Add(new CartItemDto
+                var existing = _Items.FirstOrDefault(i => i.ProductId == product.ProductId);
+                if (existing != null)
                 {
-                    ProductId = product.ProductId,
-                    ProductName = product.ProductName,
-                    Price = product.Price,
-                    Quantity = quantity
-                });
+                    existing.Quantity += quantity;
+                }
+                else
+                {
+                    _Items.Add(new CartItemDto
+                    {
+                        ProductId = product.ProductId,
+                        ProductName = product.ProductName,
+                        Price = product.Price,
+                        Quantity = quantity
+                    });
+                }
             }
+            CartChanged?.Invoke();
         }
 
         public void UpdateQuantity(int productId, int quantity)
         {
-            var e = _Items.FirstOrDefault(i => i.ProductId == productId);
-            if (e == null) return;
+            lock (_sync)
+            {
+                var e = _Items.FirstOrDefault(i => i.ProductId == productId);
+                if (e == null) return;
 
-            if(quantity <= 0) _Items.Remove(e);
-            else e.Quantity = quantity;
+                if (quantity <= 0) _Items.Remove(e);
+                else e.Quantity = quantity;
+            }
+            CartChanged?.Invoke();
         }
 
         public void Remove(int productId)
         {
-            var e = _Items.FirstOrDefault(i => i.ProductId == productId);
-            if (e != null) _Items.Remove(e);
+            lock (_sync)
+            {
+                var e = _Items.FirstOrDefault(i => i.ProductId == productId);
+                if (e != null) _Items.Remove(e);
+            }
+            CartChanged?.Invoke();
         }
 
-        public decimal GetTotal() => _Items.Sum(i => i.Price * i.Quantity);
+        public decimal GetTotal()
+        {
+            lock (_sync)
+            {
+                return _Items.Sum(i => i.Price * i.Quantity);
+            }
+        }
 
-        public void Clear() => _Items.Clear();
+        public void Clear()
+        {
+            lock (_sync)
+            {
+                _Items.Clear();
+            }
+            CartChanged?.Invoke();
+        }
     }
 }

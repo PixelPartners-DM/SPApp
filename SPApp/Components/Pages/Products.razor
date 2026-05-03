@@ -38,13 +38,72 @@ else
 
                 <p>Price: @p.Price.ToString("C")</p>
 
-                <div>
+                <div style="display:flex;gap:0.5rem;align-items:center;">
+                    <label>Qty:</label>
+                    <input type="number" min="1" value="@GetDesiredQuantity(p.ProductId)"
+                    @onchange="(e) => SetDesiredQuantity(p.ProductId, Parseint(e.Value?.ToString()))"
+                    style="width:4rem" />
+
                     <button @onclick="() => AddToCart(p)">Add to cart</button>
                 </div>
             </div>
         }
     </div>
 }
+
+<hr />
+
+<h4>Your Cart</h4>
+
+@if (!Cart.GetItems().Any())
+{
+    <p>Your cart is empty</p>
+}
+else
+{
+    <table style="width:100%;border-collapse:collapse">
+        <thead>
+            <tr>
+                <th style="text-align:left">Product</th>
+                <th style="text-align:center">Price</th>
+                <th style="text-align:center">Qty</th>
+                <th style="text-align:center">Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var it in Cart.GetItems())
+            {
+                <tr>
+                    <td>@it.ProductName</td>
+                    <td style="text-align:center">@it.Price.ToString("C")</td>
+                    <td style="text-align:center">
+                        <input type="number" min="1" value="@it.Quantity"
+                               @onchange="(e) => UpdateCartQty(it.ProductId, Parseint(e.Value?.ToString()))"
+                               style="width:4rem" />
+                    </td>
+                    <td style="text-align:center">@((it.Price * it.Quantity).ToString("C"))</td>
+                    <td style="text-align:center">
+                        <button @onclick="() => RemoveFromCart(it.ProductId)">Remove</button>"
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" style="text-align:right"><strong>Total:</strong></td>
+                <td style="text-align:center"><strong>@Cart.GetTotal().ToString("C")</strong></td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div style="margin-top:1rem">
+        <button @onclick="GoToConfirm">Confirm Order</button>
+        <button @onclick="ClearCart" style="margin-left:0.5rem">Clear cart</button>
+    </div>
+}
+
+
 
 <button @onclick="GoToUserPage">Back to profile</button>
 
@@ -53,10 +112,14 @@ else
     private bool isLoading = true;
     private string? message;
 
+    private readonly Dictionary<int, int> desiredQuantities = new();
+
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
         message = null;
+
+        Cart.CartChanged += OnCartChanged;
 
         try
         {
@@ -70,7 +133,7 @@ else
                 products = result;
 
                 foreach (var p in products)
-
+                {
                     try
                     {
                         var images = await Api.GetProductImagesAsync(p.ProductId);
@@ -87,6 +150,8 @@ else
                     {
                         p.ImageUrls = new List<string>();
                     }
+                    desiredQuantities[p.ProductId] = 1;
+                }
             }
         }
         catch (Exception ex)
@@ -99,14 +164,28 @@ else
         }
     }
 
+    private void OnCartChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        Cart.CartChanged -= OnCartChanged;
+    }
+
     private void GoToUserPage()
     {
         NavigationManager.NavigateTo("/userpage");
     }
 
+    private void GoToConfirm()
+    {
+        NavigationManager.NavigateTo("/confirmorder");
+    }
+
     private void AddToCart(ProductDto? product)
     {
         if (product == null)return;
+
+        var qty = GetDesiredQuantity(product.ProductId);
         Cart.AddProduct(new SPApp.Dto.ProductDto
         {
             ProductId = product.ProductId,
@@ -114,6 +193,38 @@ else
             Price = product.Price,
             CategoryId = product.CategoryId,
             ImageUrls = product.ImageUrls
-        });
+        }, qty);
     }
+
+    private int GetDesiredQuantity(int productId) => 
+    desiredQuantities.TryGetValue(productId, out var q) && q > 0 ? q : 1;
+
+    private void SetDesiredQuantity(int productId, int qty)
+    {
+        qty = qty <= 0 ? 1 : qty;
+        desiredQuantities[productId] = qty;
+    }
+
+    private void UpdateCartQty(int productId, int qty)
+    {
+        qty = qty <= 0 ? 1 : qty;
+        Cart.UpdateQuantity(productId, qty);
+    }
+
+    private void RemoveFromCart(int productId)
+    {
+        Cart.Remove(productId);
+    }
+
+    private void ClearCart()
+    {
+        Cart.Clear();
+    }
+
+    private static int Parseint(string? s)
+    {
+        if (int.TryParse(s, out var n)) return n;
+        return 1;
+    }
+
 }

@@ -1,0 +1,128 @@
+﻿@page "/confirmorder"
+@using SPApp.Dto
+@inject PixelPalApp.Services.ApiService Api
+@inject PixelPalApp.Services.CartService Cart
+@inject NavigationManager NavigationManager
+
+<h3>ConfirmOrder</h3>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (!string.IsNullOrEmpty(message))
+{
+    <p>@message</p>
+}
+else
+{
+    var items = Cart.GetItems();
+    if (!items.Any())
+    {
+        <p>Your cart is empty.</p>
+        <button @onclick="GoToProducts">Back to products</button>
+    }
+    else
+    {
+        <table style="width:100%;border-collapse:collapse">
+            <thead>
+                <tr><th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var it in items)
+                {
+                    <tr>
+                        <td>@it.ProductName</td>
+                        <td style="text-align:center">@it.Price.ToString("C")</td>
+                        <td style="text-align:center">@it.Quantity</td>
+                        <td style="text-align:center">@((it.Price * it.Quantity).ToString("C"))</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <p><strong>Total:</strong> @Cart.GetTotal().ToString("C")</p>
+
+        <p><em>Delivery: Standard</em></p>
+
+        <div style="margin-top:1rem">
+            <button @onclick="GoToProducts">Back</button>
+            <button @onclick="ClearCart" style="margin-left:0.5rem">Clear cart</button>
+            <button @onclick="ConfirmOrderMethod" style="margin-left:0.5rem">Confirm order</button>
+        </div>
+    }
+}
+
+@code {
+    private bool isLoading = true;
+    private string? message;
+    private string shippingAddress = "";
+    private int deliveryId = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        message = null;
+
+        try
+        {
+            var user = await Api.GetCurrentUserAsync();
+        }
+        catch
+        {
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void GoToProducts()
+    {
+        NavigationManager.NavigateTo("/products");
+    }
+
+    private void ClearCart()
+    {
+        Cart.Clear();
+        message = "Cart cleared.";
+    }
+
+    private async Task ConfirmOrderMethod()
+    {
+        message = null;
+
+        var items = Cart.GetItems().ToList();
+        if(!items.Any())
+        {
+            message = "Your cart is empty.";
+            return;
+        }
+
+        var user = await Api.GetCurrentUserAsync();
+        var order = new OrderRequestDto
+        {
+            OrderDate = DateTime.UtcNow,
+            DeliveryId = deliveryId,
+            UserId = user?.UserId ?? 0,
+            OrderProducts = items.Select(i => new OrderProductDto
+            {
+                ProductId = i.ProductId,
+                Quantity = i.Quantity
+            }).ToList()
+        };
+
+        var result = await Api.CreateOrderAsync(order);
+        if (result == null)
+        {
+            message = "Failed to create order.";
+            return;
+        }
+
+        Cart.Clear();
+        message = $"Order placed (#{result.OrderId})";
+
+        NavigationManager.NavigateTo("/userpage");
+    }
+
+}
