@@ -10,6 +10,9 @@ namespace SPApp.Dto
     {
         public int OrderId { get; set; }
         public DateTime OrderDate { get; set; }
+        public decimal TotalPrice { get; set; }
+        public string DeliveryStatus { get; set; }
+        public string DeliveryAddress { get; set; }
         public List<OrderProductDetailDto> OrderProducts { get; set; } = new();
     }
 
