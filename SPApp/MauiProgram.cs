@@ -30,6 +30,7 @@ namespace SPApp
                 });
 
             builder.Services.AddScoped<ApiService>();
+            builder.Services.AddScoped<CartService>();
 
             return builder.Build();
         }

@@ -66,6 +66,8 @@ namespace PixelPalApp.Services
             }
         }
 
+
+
         public async Task<UserDto?> GetCurrentUserAsync()
         {
             try
@@ -106,6 +108,8 @@ namespace PixelPalApp.Services
             }
         }
 
+
+
         public async Task<string> CreateUserAsync(CreateUserDto user)
         {
             try
@@ -142,6 +146,9 @@ namespace PixelPalApp.Services
             }
         }
 
+
+
+
         public async Task<bool> UpdateUserAsync(int id, UpdateUserDto user)
         {
             try
@@ -175,6 +182,9 @@ namespace PixelPalApp.Services
             }
         }
 
+
+
+
         public async Task<bool> DeleteUserAsync(int id)
         {
             try
@@ -205,6 +215,113 @@ namespace PixelPalApp.Services
                 Console.WriteLine("DELETE USER EXCEPTION");
                 Console.WriteLine(ex.ToString());
                 return false;
+            }
+        }
+
+        public async Task<List<UserDto>?> GetAllUsersAsync()
+        {
+            var token = await SecureStorage.GetAsync("jwt_token");
+
+            if (string.IsNullOrWhiteSpace(token))
+                return null;
+
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await _httpClient.GetAsync("api/User");
+
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            return await response.Content.ReadFromJsonAsync<List<UserDto>>();
+        }
+
+        //Product
+
+        public async Task<List<ProductDto>?> GetProductsAsync()
+        {
+            try
+            {
+                Console.WriteLine($"GET: {_httpClient.BaseAddress}api/Product");
+                var response = await _httpClient.GetAsync("api/Product");
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Status: {response.StatusCode}");
+                Console.WriteLine($"Body: {content}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+                return await response.Content.ReadFromJsonAsync<List<ProductDto>>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GET PRODUCTS EXCEPTION");
+                Console.WriteLine(ex.ToString());
+                return null;
+            }
+        }
+
+        //Product images
+        public async Task<List<ProductImageDto>?> GetProductImagesAsync(int productId)
+        {
+            try
+            {
+                Console.WriteLine($"GET: {_httpClient.BaseAddress}api/Product/{productId}/images");
+                var response = await _httpClient.GetAsync($"api/Product/{productId}/images");
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Status: {response.StatusCode}");
+                Console.WriteLine($"Body: {content}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+                return await response.Content.ReadFromJsonAsync<List<ProductImageDto>>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GET PRODUCT IMAGES EXCEPTION");
+                Console.WriteLine(ex.ToString());
+                return null;
+            }
+        }
+
+
+        //Orders
+        public async Task<OrderResponseDto?> CreateOrderAsync(OrderRequestDto order)
+        {
+            try
+            {
+                var token = await SecureStorage.GetAsync("jwt_token");
+                if (string.IsNullOrWhiteSpace(token))
+                {
+                    Console.WriteLine("Create order failed: no JWT token.");
+                    return null;
+                }
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
+
+                //Log serialized request
+                var json = System.Text.Json.JsonSerializer.Serialize(order);
+                Console.WriteLine("CreateOrder payload: " + json);
+
+                Console.WriteLine($"POST: {_httpClient.BaseAddress}api/Orders");
+                var response = await _httpClient.PostAsJsonAsync("api/Orders", order);
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Status: {response.StatusCode}");
+                Console.WriteLine($"Body: {content}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+                return await response.Content.ReadFromJsonAsync<OrderResponseDto>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("CREATE ORDER EXCEPTION");
+                Console.WriteLine(ex.ToString());
+                return null;
             }
         }
     }
