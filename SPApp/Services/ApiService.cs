@@ -66,6 +66,8 @@ namespace PixelPalApp.Services
             }
         }
 
+
+
         public async Task<UserDto?> GetCurrentUserAsync()
         {
             try
@@ -106,6 +108,8 @@ namespace PixelPalApp.Services
             }
         }
 
+
+
         public async Task<string> CreateUserAsync(CreateUserDto user)
         {
             try
@@ -142,6 +146,9 @@ namespace PixelPalApp.Services
             }
         }
 
+
+
+
         public async Task<bool> UpdateUserAsync(int id, UpdateUserDto user)
         {
             try
@@ -175,6 +182,9 @@ namespace PixelPalApp.Services
             }
         }
 
+
+
+
         public async Task<bool> DeleteUserAsync(int id)
         {
             try
@@ -206,6 +216,24 @@ namespace PixelPalApp.Services
                 Console.WriteLine(ex.ToString());
                 return false;
             }
+        }
+
+        public async Task<List<UserDto>?> GetAllUsersAsync()
+        {
+            var token = await SecureStorage.GetAsync("jwt_token");
+
+            if (string.IsNullOrWhiteSpace(token))
+                return null;
+
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await _httpClient.GetAsync("api/User");
+
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            return await response.Content.ReadFromJsonAsync<List<UserDto>>();
         }
     }
 }

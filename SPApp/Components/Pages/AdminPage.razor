@@ -1,0 +1,163 @@
+﻿@page "/admin"
+@using SPApp.Dto
+@using Microsoft.Maui.Storage
+@inject PixelPalApp.Services.ApiService Api
+@inject NavigationManager NavigationManager
+
+<h3>Admin Page</h3>
+
+<button @onclick="Logout">Logout</button>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p>@message</p>
+}
+
+@if (users == null)
+{
+    <p>Loading users...</p>
+}
+else
+{
+    @foreach (var user in users)
+    {
+        <div class="login-box">
+
+            @if (editingUserId == user.UserId)
+            {
+                <p><strong>ID:</strong> @user.UserId</p>
+
+                <input @bind="editUser.FullName" placeholder="Name" />
+                <input @bind="editUser.Email" placeholder="Email" />
+                <input @bind="editUser.PhoneNumber" placeholder="Phone" />
+                <input @bind="editUser.Address" placeholder="Address" />
+
+                <button @onclick="SaveEdit">Save</button>
+                <button @onclick="CancelEdit">Cancel</button>
+            }
+            else
+            {
+                <p><strong>ID:</strong> @user.UserId</p>
+                <p><strong>Name:</strong> @user.FullName</p>
+                <p><strong>Email:</strong> @user.Email</p>
+                <p><strong>Phone:</strong> @user.PhoneNumber</p>
+                <p><strong>Address:</strong> @user.Address</p>
+
+                <button @onclick="() => StartEdit(user)">Edit User</button>
+                <button @onclick="() => AskDelete(user.UserId)">Delete User</button>
+            }
+
+        </div>
+    }
+}
+
+@if (showDeleteConfirm)
+{
+    <div class="login-box">
+        <p>Are you sure you want to delete this user?</p>
+
+        <button @onclick="ConfirmDelete">Yes, delete</button>
+        <button @onclick="CancelDelete">Cancel</button>
+    </div>
+}
+
+@code {
+    private List<UserDto>? users;
+    private string message = "";
+
+    private int? editingUserId = null;
+    private UpdateUserDto editUser = new();
+
+    private bool showDeleteConfirm = false;
+    private int userIdToDelete;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        users = await Api.GetAllUsersAsync();
+
+        if (users == null)
+        {
+            message = "Could not load users. Make sure you are logged in as admin.";
+        }
+    }
+
+    private void StartEdit(UserDto user)
+    {
+        editingUserId = user.UserId;
+
+        editUser = new UpdateUserDto
+        {
+            UserId = user.UserId,
+            FullName = user.FullName,
+            Email = user.Email ?? "",
+            PhoneNumber = user.PhoneNumber,
+            Address = user.Address,
+            PasswordHash = ""
+        };
+    }
+
+    private async Task SaveEdit()
+    {
+        if (editingUserId == null)
+            return;
+
+        var success = await Api.UpdateUserAsync(editingUserId.Value, editUser);
+
+        if (success)
+        {
+            message = "User updated successfully";
+            editingUserId = null;
+            await LoadUsers();
+        }
+        else
+        {
+            message = "Could not update user";
+        }
+    }
+
+    private void CancelEdit()
+    {
+        editingUserId = null;
+        editUser = new UpdateUserDto();
+    }
+
+    private void AskDelete(int userId)
+    {
+        userIdToDelete = userId;
+        showDeleteConfirm = true;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        var success = await Api.DeleteUserAsync(userIdToDelete);
+
+        if (success)
+        {
+            message = "User deleted successfully";
+            showDeleteConfirm = false;
+            await LoadUsers();
+        }
+        else
+        {
+            message = "Could not delete user";
+        }
+    }
+
+    private void CancelDelete()
+    {
+        showDeleteConfirm = false;
+    }
+
+    private void Logout()
+    {
+        SecureStorage.Remove("jwt_token");
+        SecureStorage.Remove("user_role");
+
+        NavigationManager.NavigateTo("/login");
+    }
+}

@@ -3,41 +3,46 @@
 @inject PixelPalApp.Services.ApiService Api
 @inject NavigationManager NavigationManager
 
-<h1>Opret bruger</h1>
+<h1>Create User</h1>
 
 <div class="login-box">
 
     <div class="form-group">
-        <label>Fulde navn</label>
-        <input @bind="fullName" placeholder="Dit navn" />
+        <label>Full Name</label>
+        <input @bind="fullName" placeholder="Your Name" />
     </div>
 
     <div class="form-group">
         <label>Email</label>
-        <input @bind="email" type="email" placeholder="Din email" />
+        <input @bind="email" type="email" placeholder="Your Email" />
     </div>
 
     <div class="form-group">
         <label>Password</label>
-        <input @bind="password" type="password" placeholder="Vælg password" />
+        <input @bind="password" type="password" placeholder="Choose Password" />
     </div>
 
     <div class="form-group">
-        <label>Telefonnummer</label>
-        <input @bind="phoneNumber" placeholder="Dit telefonnummer" />
+        <label>Confirm Password</label>
+        <input @bind="confirmPassword" type="password" placeholder="Confirm Password" />
     </div>
 
     <div class="form-group">
-        <label>Adresse</label>
-        <input @bind="address" placeholder="Din adresse" />
+        <label>Phone Number</label>
+        <input @bind="phoneNumber" placeholder="Your Phone Number" />
+    </div>
+
+    <div class="form-group">
+        <label>Address</label>
+        <input @bind="address" placeholder="Your Address" />
     </div>
 
     <button @onclick="HandleCreateUser">
-        Opret bruger
+        Create User
     </button>
 
     <button @onclick="GoToLogin">
-        Tilbage til login
+        Back to Login
     </button>
 
     @if (!string.IsNullOrEmpty(message))
@@ -52,6 +57,7 @@
     private string fullName = "";
     private string email = "";
     private string password = "";
+    private string confirmPassword = "";
     private string phoneNumber = "";
     private string address = "";
     private string message = "";
@@ -66,7 +72,13 @@
             string.IsNullOrWhiteSpace(email) ||
             string.IsNullOrWhiteSpace(password))
         {
-            message = "Navn, email og password skal udfyldes.";
+            message = "Name, email, and password are required.";
+            return;
+        }
+
+        if (password != confirmPassword)
+        {
+            message = "Password and confirm password do not match.";
             return;
         }
 
@@ -91,7 +103,9 @@
         }
 
         // Success
-        message = "Bruger oprettet!";
+        message = "User created successfully!";
+
+        await Task.Delay(2000);
 
         // Gå tilbage til login
         NavigationManager.NavigateTo("/login");
