@@ -1,63 +1,124 @@
 ﻿@page "/userpage"
 @using SPApp.Dto
-@inject PixelPalApp.Services.ApiService Api
+@using System.Net.Http.Headers
+@using Microsoft.Maui.Storage
+@inject HttpClient Http
 @inject NavigationManager NavigationManager
 
-<h3>UserPage</h3>
+<h3>Min Profil</h3>
 
-@if(isLoading)
+@if (!string.IsNullOrWhiteSpace(errorMessage))
 {
-    <p>Loading current user...</p>
+    <p style="color:red">@errorMessage</p>
 }
-else if(!string.IsNullOrEmpty(message))
+
+@if (user == null)
 {
-    <p>@message</p>
+    <p>Indlæser...</p>
 }
-else if(user == null)
+else if (isEditing)
 {
-    <p>No user is logged in.</p>
-    <button @onclick="GoToLogin">Go to Login</button>
+    <input @bind="editUser.FullName" placeholder="Navn" />
+    <input @bind="editUser.Email" placeholder="Email" />
+    <input @bind="editUser.PhoneNumber" placeholder="Telefon" />
+    <input @bind="editUser.Address" placeholder="Adresse" />
+
+    <button @onclick="SaveChanges">Gem ændringer</button>
+    <button @onclick="CancelEdit">Annuller</button>
 }
 else
 {
-    <div class="user-info">
-        <p>ID: @user.UserId</p>
-        <p>Velkommen!, @user.FullName!</p>
-        <p>Email: @user.Email</p>
-        <p>Telefonnummer: @user.PhoneNumber</p>
-        <p>Adresse: @user.Address</p>
+    <p><strong>Navn:</strong> @user.FullName</p>
+    <p><strong>Email:</strong> @user.Email</p>
+    <p><strong>Telefon:</strong> @user.PhoneNumber</p>
+    <p><strong>Adresse:</strong> @user.Address</p>
 
-        <button @onclick="GoToProducts">Browse products</button>
-    </div>
+    <button @onclick="StartEdit">Rediger profil</button>
+    <button @onclick="GoToProducts">Browse products</button>
+}
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p>@message</p>
 }
 
 @code {
-        private UserDto user;
-    private bool isLoading = true;
-    private string message;
+    private UserDto? user;
+    private UpdateUserDto editUser = new();
+
+    private bool isEditing = false;
+    private string errorMessage = "";
+    private string message = "";
 
     protected override async Task OnInitializedAsync()
     {
-        isLoading = true;
-        message = null;
+        await LoadUser();
+    }
+
+    private async Task LoadUser()
+    {
+        var token = await SecureStorage.GetAsync("jwt_token");
+
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            errorMessage = "Ingen token fundet. Log ind igen.";
+            return;
+        }
+
+        Http.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
 
         try
         {
-            user = await Api.GetCurrentUserAsync();
+            user = await Http.GetFromJsonAsync<UserDto>("api/User/me");
         }
         catch (Exception ex)
         {
-            message = "Error loading user data.";
-        }
-        finally
-        {
-            isLoading = false;
+            errorMessage = "Kunne ikke hente brugeroplysninger.";
+            Console.WriteLine(ex.Message);
         }
     }
 
-    private void GoToLogin()
+    private void StartEdit()
     {
-        NavigationManager.NavigateTo("/login");
+        if (user == null)
+            return;
+
+        editUser = new UpdateUserDto
+        {
+            UserId = user.UserId,
+            FullName = user.FullName,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            Address = user.Address,
+            PasswordHash = ""
+        };
+
+        isEditing = true;
+    }
+
+    private async Task SaveChanges()
+    {
+        if (user == null)
+            return;
+
+        var response = await Http.PutAsJsonAsync($"api/User/{user.UserId}", editUser);
+
+        if (response.IsSuccessStatusCode)
+        {
+            message = "Profil opdateret!";
+            isEditing = false;
+            await LoadUser();
+        }
+        else
+        {
+            message = "Kunne ikke opdatere profil.";
+        }
+    }
+
+    private void CancelEdit()
+    {
+        isEditing = false;
     }
 
     private void GoToProducts()

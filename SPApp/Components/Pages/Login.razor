@@ -26,7 +26,7 @@
 
     <!-- Opret bruger knap -->
     <button @onclick="GoToCreateUser">
-        Opret bruger
+        Create Account
     </button>
 
     @if (!string.IsNullOrEmpty(message))
@@ -66,7 +66,7 @@
             // Hvis login fejler
             if (result == null || string.IsNullOrWhiteSpace(result.Token))
             {
-                message = "Forkert email eller password.";
+                message = "Wrong email or password.";
                 return;
             }
 
