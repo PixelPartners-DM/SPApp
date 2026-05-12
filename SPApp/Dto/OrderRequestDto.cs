@@ -10,8 +10,7 @@ namespace SPApp.Dto
     public class OrderRequestDto
     {
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
-        public int DeliveryId { get; set; }
-        public int UserId { get; set; }
+        public int? DeliveryId { get; set; }
         public List<OrderProductDto> Products { get; set; } = new();
     }
 }

@@ -104,7 +104,6 @@ else
         {
             OrderDate = DateTime.UtcNow,
             DeliveryId = deliveryId,
-            UserId = user?.UserId ?? 0,
             Products = items.Select(i => new OrderProductDto
             {
                 ProductId = i.ProductId,

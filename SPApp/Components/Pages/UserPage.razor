@@ -35,6 +35,7 @@ else
 
     <button @onclick="StartEdit">Rediger profil</button>
     <button @onclick="GoToProducts">Browse products</button>
+    <button @onclick="GoToOrderDetails">My orders</button>
 }
 
 @if (!string.IsNullOrWhiteSpace(message))
@@ -124,5 +125,10 @@ else
     private void GoToProducts()
     {
         NavigationManager.NavigateTo("/products");
+    }
+
+    private void GoToOrderDetails()
+    {
+        NavigationManager.NavigateTo("/userorderdetails");
     }
 }

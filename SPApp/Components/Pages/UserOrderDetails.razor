@@ -1,0 +1,85 @@
+﻿@page "/userorderdetails"
+@using System.Net.Http.Headers
+@using SPApp.Dto
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+
+<h3>My orders</h3>
+
+@if (orders == null)
+{
+    <p>Loading orders...</p>
+}
+else if (!orders.Any())
+{
+    <p>You have no orders.</p>
+}
+else
+{
+    @foreach (var order in orders)
+    {
+        <div class="order-card" style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+            <p><strong>Order ID: </strong>@order.OrderId</p>
+            <p><strong>Date: </strong>@order.OrderDate.ToString("dd-MM-yyyy HH:mm")</p>
+
+            <p><strong>Status:</strong> @order.DeliveryStatus</p>
+            <p><strong>Address:</strong> @order.DeliveryAddress</p>
+            <p><strong>Total Price:</strong> @order.TotalPrice.ToString("C", new System.Globalization.CultureInfo("da-DK"))</p>
+
+            <h4>Products</h4>
+            @foreach (var item in order.OrderProducts)
+            {
+                <div class="product-line">
+                    <p><strong>@item.Product.ProductName</strong> - @item.Product.Price.ToString("C", new System.Globalization.CultureInfo("da-DK")) - Qty: (x @item.Quantity)</p>
+
+                    @if (item.Product.ImageUrls != null && item.Product.ImageUrls.Any())
+                    {
+                        <img src="@item.Product.ImageUrls.First()"
+                             style="max-width:80px;max-height:80px" />
+                    }
+                </div>
+            }
+        </div>
+    }
+}
+
+<button @onclick="GoBack">Go Back</button>
+
+@code {
+    private List<OrderDto>? orders;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrders();
+    }
+
+    private async Task LoadOrders()
+    {
+        var token = await SecureStorage.GetAsync("jwt_token");
+
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        try
+        {
+            orders = await Http.GetFromJsonAsync<List<OrderDto>>("api/Orders/user");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Couldn't load orders: " + ex.Message);
+            orders = new List<OrderDto>();
+        }
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/userpage");
+    }
+
+}
