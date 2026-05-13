@@ -24,7 +24,7 @@ namespace PixelPalApp.Services
                     Password = password
                 };
 
-                Console.WriteLine("========== LOGIN START ==========");
+                Console.WriteLine("Login start");
                 Console.WriteLine($"POST: {_httpClient.BaseAddress}api/auth/login");
                 Console.WriteLine($"Email: {email}");
 
@@ -36,7 +36,7 @@ namespace PixelPalApp.Services
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    Console.WriteLine("LOGIN FAILED");
+                    Console.WriteLine("Login failed");
                     return null;
                 }
 
@@ -44,23 +44,23 @@ namespace PixelPalApp.Services
 
                 if (result == null || string.IsNullOrWhiteSpace(result.Token))
                 {
-                    Console.WriteLine("TOKEN MISSING IN RESPONSE");
+                    Console.WriteLine("Token missing in response");
                     return null;
                 }
 
                 await SecureStorage.SetAsync("jwt_token", result.Token);
                 await SecureStorage.SetAsync("user_role", result.Role);
 
-                Console.WriteLine("LOGIN SUCCESS");
+                Console.WriteLine("Login success");
                 Console.WriteLine($"Role: {result.Role}");
                 Console.WriteLine($"Token start: {result.Token.Substring(0, 25)}...");
-                Console.WriteLine("========== LOGIN END ==========");
+                Console.WriteLine("Login end");
 
                 return result;
             }
             catch (Exception ex)
             {
-                Console.WriteLine("LOGIN EXCEPTION");
+                Console.WriteLine("Login exception");
                 Console.WriteLine(ex.ToString());
                 return null;
             }
@@ -83,7 +83,7 @@ namespace PixelPalApp.Services
                 _httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);
 
-                Console.WriteLine("========== GET CURRENT USER ==========");
+                Console.WriteLine("Get current user start");
                 Console.WriteLine($"GET: {_httpClient.BaseAddress}api/user/me");
                 Console.WriteLine($"Token start: {token.Substring(0, 25)}...");
 
@@ -102,7 +102,7 @@ namespace PixelPalApp.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("GET CURRENT USER EXCEPTION");
+                Console.WriteLine("Get current user exception");
                 Console.WriteLine(ex.ToString());
                 return null;
             }
@@ -114,7 +114,7 @@ namespace PixelPalApp.Services
         {
             try
             {
-                Console.WriteLine("========== CREATE USER ==========");
+                Console.WriteLine("Create user start");
                 Console.WriteLine($"POST: {_httpClient.BaseAddress}api/user");
                 Console.WriteLine($"Email: {user.Email}");
                 Console.WriteLine($"FullName: {user.FullName}");
@@ -134,13 +134,13 @@ namespace PixelPalApp.Services
             }
             catch (HttpRequestException ex)
             {
-                Console.WriteLine("CREATE USER HTTP EXCEPTION");
+                Console.WriteLine("Create user HTTP exception");
                 Console.WriteLine(ex.ToString());
                 return $"Connection failure: {ex.Message}";
             }
             catch (Exception ex)
             {
-                Console.WriteLine("CREATE USER EXCEPTION");
+                Console.WriteLine("Create user exception");
                 Console.WriteLine(ex.ToString());
                 return $"Ukendt fejl: {ex.Message}";
             }
@@ -176,7 +176,7 @@ namespace PixelPalApp.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("UPDATE USER EXCEPTION");
+                Console.WriteLine("Update user exception");
                 Console.WriteLine(ex.ToString());
                 return false;
             }
@@ -212,7 +212,7 @@ namespace PixelPalApp.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("DELETE USER EXCEPTION");
+                Console.WriteLine("Delete user exception");
                 Console.WriteLine(ex.ToString());
                 return false;
             }
@@ -255,7 +255,7 @@ namespace PixelPalApp.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("GET PRODUCTS EXCEPTION");
+                Console.WriteLine("Get products exception");
                 Console.WriteLine(ex.ToString());
                 return null;
             }
@@ -280,7 +280,7 @@ namespace PixelPalApp.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("GET PRODUCT IMAGES EXCEPTION");
+                Console.WriteLine("Get product images exception");
                 Console.WriteLine(ex.ToString());
                 return null;
             }
@@ -319,7 +319,7 @@ namespace PixelPalApp.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("CREATE ORDER EXCEPTION");
+                Console.WriteLine("Create order exception");
                 Console.WriteLine(ex.ToString());
                 return null;
             }

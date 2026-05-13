@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace PixelPalApp.Services
 {
-    //Simple in-memory cart kept scoped for the user session.
     public class CartService
     {
         private readonly List<CartItemDto> _Items = new();

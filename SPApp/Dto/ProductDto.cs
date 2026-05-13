@@ -13,8 +13,6 @@ namespace SPApp.Dto
         public decimal Price { get; set; }
         public int CategoryId { get; set; }
 
-        // Simplified client model for images (server uses ProductImage)
         public List<string> ImageUrls { get; set; } = new();
-        //public int Stock { get; set; }
     }
 }

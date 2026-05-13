@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace SPApp.Dto
 {
-    // Matches server Orders + OrderProduct shape in a way the API can accept
     public class OrderRequestDto
     {
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
