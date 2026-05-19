@@ -44,13 +44,13 @@
 
                             <div>
                                 <strong>@it.ProductName</strong>
-                                <p>@it.Price.ToString("C")</p>
+                                <p>@it.Price.ToString("C", new System.Globalization.CultureInfo("da-DK"))</p>
                             </div>
 
                             <div>
                                 <p>Qty: @it.Quantity</p>
                                 <strong>
-                                    @((it.Price * it.Quantity).ToString("C"))
+                                    @((it.Price * it.Quantity).ToString("C", new System.Globalization.CultureInfo("da-DK")))
                                 </strong>
                             </div>
 
@@ -61,7 +61,7 @@
 
                 <div class="confirm-total">
                     <strong>Total:</strong>
-                    <strong>@Cart.GetTotal().ToString("C")</strong>
+                    <strong>@Cart.GetTotal().ToString("C", new System.Globalization.CultureInfo("da-DK"))</strong>
                 </div>
 
                 <p class="delivery-text">

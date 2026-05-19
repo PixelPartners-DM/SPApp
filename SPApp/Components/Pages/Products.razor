@@ -40,7 +40,7 @@
                         </div>
                     }
 
-                    <p>Price: @p.Price.ToString("C")</p>
+                    <p>Price: @p.Price.ToString("C", new System.Globalization.CultureInfo("da-DK"))</p>
 
                     <div class="qty-row">
 
@@ -81,7 +81,7 @@
 
                         <div>
                             <strong>@it.ProductName</strong>
-                            <p>@it.Price.ToString("C")</p>
+                            <p>@it.Price.ToString("C", new System.Globalization.CultureInfo("da-DK"))</p>
                         </div>
 
                         <div class="cart-qty">
@@ -98,7 +98,7 @@
                         <div>
 
                             <strong>
-                                @((it.Price * it.Quantity).ToString("C"))
+                                @((it.Price * it.Quantity).ToString("C", new System.Globalization.CultureInfo("da-DK")))
                             </strong>
 
                             <button @onclick="() => RemoveFromCart(it.ProductId)">
@@ -112,7 +112,7 @@
 
                 <div class="cart-total">
                     <strong>Total:</strong>
-                    <strong>@Cart.GetTotal().ToString("C")</strong>
+                    <strong>@Cart.GetTotal().ToString("C", new System.Globalization.CultureInfo("da-DK"))</strong>
                 </div>
 
             </div>
