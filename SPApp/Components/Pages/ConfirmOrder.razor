@@ -4,54 +4,91 @@
 @inject PixelPalApp.Services.CartService Cart
 @inject NavigationManager NavigationManager
 
-<h3>ConfirmOrder</h3>
+<div class="page">
 
-@if (isLoading)
-{
-    <p>Loading...</p>
-}
-else if (!string.IsNullOrEmpty(message))
-{
-    <p>@message</p>
-}
-else
-{
-    var items = Cart.GetItems();
-    if (!items.Any())
+    <h1>Confirm Order</h1>
+
+    @if (isLoading)
     {
-        <p>Your cart is empty.</p>
-        <button @onclick="GoToProducts">Back to products</button>
+        <p>Loading...</p>
+    }
+    else if (!string.IsNullOrEmpty(message))
+    {
+        <p>@message</p>
     }
     else
     {
-        <table style="width:100%;border-collapse:collapse">
-            <thead>
-                <tr><th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th></tr>
-            </thead>
-            <tbody>
-                @foreach (var it in items)
-                {
-                    <tr>
-                        <td>@it.ProductName</td>
-                        <td style="text-align:center">@it.Price.ToString("C")</td>
-                        <td style="text-align:center">@it.Quantity</td>
-                        <td style="text-align:center">@((it.Price * it.Quantity).ToString("C"))</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        var items = Cart.GetItems();
 
-        <p><strong>Total:</strong> @Cart.GetTotal().ToString("C")</p>
+        if (!items.Any())
+        {
+            <div class="confirm-box">
 
-        <p><em>Delivery: Standard</em></p>
+                <p>Your cart is empty.</p>
 
-        <div style="margin-top:1rem">
-            <button @onclick="GoToProducts">Back</button>
-            <button @onclick="ClearCart" style="margin-left:0.5rem">Clear cart</button>
-            <button @onclick="ConfirmOrderMethod" style="margin-left:0.5rem">Confirm order</button>
-        </div>
+                <button class="full-button" @onclick="GoToProducts">
+                    Back to products
+                </button>
+
+            </div>
+        }
+        else
+        {
+            <div class="confirm-box">
+
+                <div class="confirm-items">
+
+                    @foreach (var it in items)
+                    {
+                        <div class="confirm-item">
+
+                            <div>
+                                <strong>@it.ProductName</strong>
+                                <p>@it.Price.ToString("C")</p>
+                            </div>
+
+                            <div>
+                                <p>Qty: @it.Quantity</p>
+                                <strong>
+                                    @((it.Price * it.Quantity).ToString("C"))
+                                </strong>
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+
+                <div class="confirm-total">
+                    <strong>Total:</strong>
+                    <strong>@Cart.GetTotal().ToString("C")</strong>
+                </div>
+
+                <p class="delivery-text">
+                    Delivery: Standard
+                </p>
+
+                <div class="confirm-actions">
+
+                    <button @onclick="GoToProducts">
+                        Back
+                    </button>
+
+                    <button @onclick="ClearCart">
+                        Clear cart
+                    </button>
+
+                    <button @onclick="ConfirmOrderMethod">
+                        Confirm order
+                    </button>
+
+                </div>
+
+            </div>
+        }
     }
-}
+
+</div>
 
 @code {
     private bool isLoading = true;
@@ -93,17 +130,20 @@ else
         message = null;
 
         var items = Cart.GetItems().ToList();
-        if(!items.Any())
+
+        if (!items.Any())
         {
             message = "Your cart is empty.";
             return;
         }
 
         var user = await Api.GetCurrentUserAsync();
+
         var order = new OrderRequestDto
         {
             OrderDate = DateTime.UtcNow,
             DeliveryId = deliveryId,
+
             Products = items.Select(i => new OrderProductDto
             {
                 ProductId = i.ProductId,
@@ -112,6 +152,7 @@ else
         };
 
         var result = await Api.CreateOrderAsync(order);
+
         if (result == null)
         {
             message = "Failed to create order.";
@@ -119,9 +160,9 @@ else
         }
 
         Cart.Clear();
+
         message = $"Order placed (#{result.OrderId})";
 
         NavigationManager.NavigateTo("/userpage");
     }
-
 }

@@ -5,50 +5,127 @@
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
-<h3>Min Profil</h3>
+<div class="page">
 
-@if (!string.IsNullOrWhiteSpace(errorMessage))
+    <h3>My Profile</h3>
+
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <p style="color:red">@errorMessage</p>
+    }
+
+    @if (user == null)
+    {
+        <p>Loading...</p>
+    }
+    else if (isEditing)
+    {
+        <div class="edit-animation">
+
+            <input @bind="editUser.FullName" placeholder="Full name" />
+            <input @bind="editUser.Email" placeholder="Email" />
+            <input @bind="editUser.PhoneNumber" placeholder="Phone number" />
+            <input @bind="editUser.Address" placeholder="Address" />
+
+            <button @onclick="ShowConfirmPopup">
+                Save changes
+            </button>
+
+            <button @onclick="CancelEdit">
+                Cancel
+            </button>
+
+        </div>
+    }
+    else
+    {
+        <p><strong>Name:</strong> @user.FullName</p>
+
+        <p><strong>Email:</strong> @user.Email</p>
+
+        <p><strong>Phone:</strong> @user.PhoneNumber</p>
+
+        <p><strong>Address:</strong> @user.Address</p>
+
+        <button @onclick="StartEdit">
+            Edit profile
+        </button>
+
+        <button @onclick="GoToProducts">
+            Browse products
+        </button>
+
+        <button @onclick="GoToOrderDetails">
+            My orders
+        </button>
+
+        <button class="logout-btn" @onclick="Logout">
+            Log out
+        </button>
+    }
+
+</div>
+
+@if (showConfirmPopup)
 {
-    <p style="color:red">@errorMessage</p>
+    <div class="popup-overlay">
+
+        <div class="popup-box">
+
+            <h4>Confirm changes</h4>
+
+            <p>
+                Are you sure you want to save your changes?
+            </p>
+
+            <button @onclick="SaveChanges">
+                Yes, save
+            </button>
+
+            <button @onclick="CancelPopup">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
 }
 
-@if (user == null)
+@if (showSuccessPopup)
 {
-    <p>Indlæser...</p>
-}
-else if (isEditing)
-{
-    <input @bind="editUser.FullName" placeholder="Navn" />
-    <input @bind="editUser.Email" placeholder="Email" />
-    <input @bind="editUser.PhoneNumber" placeholder="Telefon" />
-    <input @bind="editUser.Address" placeholder="Adresse" />
+    <div class="popup-overlay">
 
-    <button @onclick="SaveChanges">Gem ændringer</button>
-    <button @onclick="CancelEdit">Annuller</button>
-}
-else
-{
-    <p><strong>Navn:</strong> @user.FullName</p>
-    <p><strong>Email:</strong> @user.Email</p>
-    <p><strong>Telefon:</strong> @user.PhoneNumber</p>
-    <p><strong>Adresse:</strong> @user.Address</p>
+        <div class="popup-box">
 
-    <button @onclick="StartEdit">Rediger profil</button>
-    <button @onclick="GoToProducts">Browse products</button>
-    <button @onclick="GoToOrderDetails">My orders</button>
-}
+            <h4>Success</h4>
 
-@if (!string.IsNullOrWhiteSpace(message))
-{
-    <p>@message</p>
+            <p>
+                Your profile was updated successfully!
+            </p>
+
+            <button @onclick="CloseSuccessPopup">
+                OK
+            </button>
+
+        </div>
+
+    </div>
 }
 
 @code {
+
     private UserDto? user;
+
     private UpdateUserDto editUser = new();
 
     private bool isEditing = false;
+
+    private bool showConfirmPopup = false;
+
+    private bool showSuccessPopup = false;
+
     private string errorMessage = "";
+
     private string message = "";
 
     protected override async Task OnInitializedAsync()
@@ -62,7 +139,7 @@ else
 
         if (string.IsNullOrWhiteSpace(token))
         {
-            errorMessage = "Ingen token fundet. Log ind igen.";
+            NavigationManager.NavigateTo("/login");
             return;
         }
 
@@ -75,7 +152,8 @@ else
         }
         catch (Exception ex)
         {
-            errorMessage = "Kunne ikke hente brugeroplysninger.";
+            errorMessage = "Could not load user information.";
+
             Console.WriteLine(ex.Message);
         }
     }
@@ -98,22 +176,42 @@ else
         isEditing = true;
     }
 
+    private void ShowConfirmPopup()
+    {
+        showConfirmPopup = true;
+    }
+
+    private void CancelPopup()
+    {
+        showConfirmPopup = false;
+    }
+
+    private void CloseSuccessPopup()
+    {
+        showSuccessPopup = false;
+    }
+
     private async Task SaveChanges()
     {
         if (user == null)
             return;
 
-        var response = await Http.PutAsJsonAsync($"api/User/{user.UserId}", editUser);
+        showConfirmPopup = false;
+
+        var response =
+            await Http.PutAsJsonAsync($"api/User/{user.UserId}", editUser);
 
         if (response.IsSuccessStatusCode)
         {
-            message = "Profil opdateret!";
+            showSuccessPopup = true;
+
             isEditing = false;
+
             await LoadUser();
         }
         else
         {
-            message = "Kunne ikke opdatere profil.";
+            message = "Could not update profile.";
         }
     }
 
@@ -130,5 +228,16 @@ else
     private void GoToOrderDetails()
     {
         NavigationManager.NavigateTo("/userorderdetails");
+    }
+
+    private async Task Logout()
+    {
+        SecureStorage.Remove("jwt_token");
+
+        SecureStorage.Remove("user_role");
+
+        await Task.Delay(100);
+
+        NavigationManager.NavigateTo("/login");
     }
 }

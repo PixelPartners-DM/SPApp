@@ -4,35 +4,39 @@
 @inject NavigationManager NavigationManager
 @using Microsoft.Maui.Storage
 
-<h1>Login</h1>
+<div class="page">
 
-<!-- Container til hele login boksen -->
-<div class="login-box">
+    <h1>Login</h1>
 
-    <!-- Email felt -->
-    <div class="form-group">
-        <label>Email</label>
-        <input @bind="email" type="email" placeholder="Type your email" />
+    <!-- Container til hele login boksen -->
+    <div class="login-box">
+
+        <!-- Email felt -->
+        <div class="form-group">
+            <label>Email</label>
+            <input @bind="email" type="email" placeholder="Type your email" />
+        </div>
+
+        <!-- Password felt -->
+        <div class="form-group">
+            <label>Password</label>
+            <input @bind="password" type="password" placeholder="Type your password" />
+        </div>
+
+        <!-- Login knap -->
+        <button @onclick="HandleLogin">Log in</button>
+
+        <!-- Opret bruger knap -->
+        <button @onclick="GoToCreateUser">
+            Create Account
+        </button>
+
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <p>@message</p>
+        }
+
     </div>
-
-    <!-- Password felt -->
-    <div class="form-group">
-        <label>Password</label>
-        <input @bind="password" type="password" placeholder="Type your password" />
-    </div>
-
-    <!-- Login knap -->
-    <button @onclick="HandleLogin">Log in</button>
-
-    <!-- Opret bruger knap -->
-    <button @onclick="GoToCreateUser">
-        Create Account
-    </button>
-
-    @if (!string.IsNullOrEmpty(message))
-    {
-        <p>@message</p>
-    }
 
 </div>
 

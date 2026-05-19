@@ -4,47 +4,57 @@
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
+<div class="page">
 
-<h3>My orders</h3>
+    <h1>My Orders</h1>
 
-@if (orders == null)
-{
-    <p>Loading orders...</p>
-}
-else if (!orders.Any())
-{
-    <p>You have no orders.</p>
-}
-else
-{
-    @foreach (var order in orders)
+    @if (orders == null)
     {
-        <div class="order-card" style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
-            <p><strong>Order ID: </strong>@order.OrderId</p>
-            <p><strong>Date: </strong>@order.OrderDate.ToString("dd-MM-yyyy HH:mm")</p>
-
-            <p><strong>Status:</strong> @order.DeliveryStatus</p>
-            <p><strong>Address:</strong> @order.DeliveryAddress</p>
-            <p><strong>Total Price:</strong> @order.TotalPrice.ToString("C", new System.Globalization.CultureInfo("da-DK"))</p>
-
-            <h4>Products</h4>
-            @foreach (var item in order.OrderProducts)
+        <p>Loading orders...</p>
+    }
+    else if (!orders.Any())
+    {
+        <p>You have no orders.</p>
+    }
+    else
+    {
+        <div class="orders-list">
+            @foreach (var order in orders)
             {
-                <div class="product-line">
-                    <p><strong>@item.Product.ProductName</strong> - @item.Product.Price.ToString("C", new System.Globalization.CultureInfo("da-DK")) - Qty: (x @item.Quantity)</p>
+                <div class="order-card">
+                    <p><strong>Order ID:</strong> @order.OrderId</p>
+                    <p><strong>Date:</strong> @order.OrderDate.ToString("dd-MM-yyyy HH:mm")</p>
+                    <p><strong>Status:</strong> @order.DeliveryStatus</p>
+                    <p><strong>Address:</strong> @order.DeliveryAddress</p>
+                    <p><strong>Total Price:</strong> @order.TotalPrice.ToString("C", new System.Globalization.CultureInfo("da-DK"))</p>
 
-                    @if (item.Product.ImageUrls != null && item.Product.ImageUrls.Any())
+                    <h4>Products</h4>
+
+                    @foreach (var item in order.OrderProducts)
                     {
-                        <img src="@item.Product.ImageUrls.First()"
-                             style="max-width:80px;max-height:80px" />
+                        <div class="order-product-line">
+                            <div>
+                                <strong>@item.Product.ProductName</strong>
+                                <p>
+                                    @item.Product.Price.ToString("C", new System.Globalization.CultureInfo("da-DK"))
+                                    - Qty: x @item.Quantity
+                                </p>
+                            </div>
+
+                            @if (item.Product.ImageUrls != null && item.Product.ImageUrls.Any())
+                            {
+                                <img src="@item.Product.ImageUrls.First()" />
+                            }
+                        </div>
                     }
                 </div>
             }
         </div>
     }
-}
 
-<button @onclick="GoBack">Go Back</button>
+    <button class="back-button" @onclick="GoBack">Go Back</button>
+
+</div>
 
 @code {
     private List<OrderDto>? orders;
@@ -64,7 +74,8 @@ else
             return;
         }
 
-        Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        Http.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
 
         try
         {
@@ -81,5 +92,4 @@ else
     {
         NavigationManager.NavigateTo("/userpage");
     }
-
 }

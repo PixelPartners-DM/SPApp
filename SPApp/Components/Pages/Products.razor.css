@@ -1,0 +1,158 @@
+.page {
+    animation: fadeIn 0.35s ease-in-out;
+}
+
+.products {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.product-card {
+    background: #1a1a1a;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+    .product-card h3 {
+        color: white;
+        margin-bottom: 12px;
+    }
+
+    .product-card p {
+        color: #cccccc;
+    }
+
+.product-images {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+    .product-images img {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 12px;
+    }
+
+.qty-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+    .qty-row input {
+        width: 80px;
+    }
+
+.cart-box {
+    margin-top: 30px;
+    padding: 24px;
+    background: #1a1a1a;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+    .cart-box h4 {
+        color: white;
+        font-size: 28px;
+        margin-bottom: 20px;
+    }
+
+.cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.cart-item {
+    background: #111;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+    .cart-item strong {
+        color: white;
+    }
+
+    .cart-item p {
+        color: #cccccc;
+        margin-top: 6px;
+    }
+
+.cart-qty {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+    .cart-qty label {
+        color: white;
+    }
+
+    .cart-qty input {
+        width: 80px;
+    }
+
+.cart-total {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #333;
+    padding-top: 16px;
+    color: white;
+    font-size: 18px;
+}
+
+.cart-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+    .cart-actions button {
+        flex: 1;
+    }
+
+.back-button {
+    margin-top: 20px;
+}
+
+button {
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: #2a2a2a;
+    color: white;
+    font-weight: 600;
+}
+
+    button:hover {
+        background: #3a3a3a;
+    }
+
+input {
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #444;
+    background: #111;
+    color: white;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -4,62 +4,105 @@
 @inject PixelPalApp.Services.ApiService Api
 @inject NavigationManager NavigationManager
 
-<h3>Admin Page</h3>
+<div class="page">
 
-<button @onclick="Logout">Logout</button>
+    <h1>Admin Panel</h1>
 
-@if (!string.IsNullOrWhiteSpace(message))
-{
-    <p>@message</p>
-}
+    <button class="logout-button" @onclick="Logout">
+        Logout
+    </button>
 
-@if (users == null)
-{
-    <p>Loading users...</p>
-}
-else
-{
-    @foreach (var user in users)
+    @if (!string.IsNullOrWhiteSpace(message))
     {
-        <div class="login-box">
+        <p>@message</p>
+    }
 
-            @if (editingUserId == user.UserId)
+    @if (users == null)
+    {
+        <p>Loading users...</p>
+    }
+    else
+    {
+        <div class="admin-users">
+
+            @foreach (var user in users)
             {
-                <p><strong>ID:</strong> @user.UserId</p>
+                <div class="admin-card">
 
-                <input @bind="editUser.FullName" placeholder="Name" />
-                <input @bind="editUser.Email" placeholder="Email" />
-                <input @bind="editUser.PhoneNumber" placeholder="Phone" />
-                <input @bind="editUser.Address" placeholder="Address" />
+                    @if (editingUserId == user.UserId)
+                    {
+                        <p><strong>ID:</strong> @user.UserId</p>
 
-                <button @onclick="SaveEdit">Save</button>
-                <button @onclick="CancelEdit">Cancel</button>
-            }
-            else
-            {
-                <p><strong>ID:</strong> @user.UserId</p>
-                <p><strong>Name:</strong> @user.FullName</p>
-                <p><strong>Email:</strong> @user.Email</p>
-                <p><strong>Phone:</strong> @user.PhoneNumber</p>
-                <p><strong>Address:</strong> @user.Address</p>
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input @bind="editUser.FullName" />
+                        </div>
 
-                <button @onclick="() => StartEdit(user)">Edit User</button>
-                <button @onclick="() => AskDelete(user.UserId)">Delete User</button>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input @bind="editUser.Email" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input @bind="editUser.PhoneNumber" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Address</label>
+                            <input @bind="editUser.Address" />
+                        </div>
+
+                        <div class="admin-actions">
+                            <button @onclick="SaveEdit">Save</button>
+                            <button @onclick="CancelEdit">Cancel</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <p><strong>ID:</strong> @user.UserId</p>
+                        <p><strong>Name:</strong> @user.FullName</p>
+                        <p><strong>Email:</strong> @user.Email</p>
+                        <p><strong>Phone:</strong> @user.PhoneNumber</p>
+                        <p><strong>Address:</strong> @user.Address</p>
+
+                        <div class="admin-actions">
+                            <button @onclick="() => StartEdit(user)">
+                                Edit User
+                            </button>
+
+                            <button @onclick="() => AskDelete(user.UserId)">
+                                Delete User
+                            </button>
+                        </div>
+                    }
+
+                </div>
             }
 
         </div>
     }
-}
 
-@if (showDeleteConfirm)
-{
-    <div class="login-box">
-        <p>Are you sure you want to delete this user?</p>
+    @if (showDeleteConfirm)
+    {
+        <div class="confirm-delete-box">
 
-        <button @onclick="ConfirmDelete">Yes, delete</button>
-        <button @onclick="CancelDelete">Cancel</button>
-    </div>
-}
+            <p>Are you sure you want to delete this user?</p>
+
+            <div class="admin-actions">
+                <button @onclick="ConfirmDelete">
+                    Yes, delete
+                </button>
+
+                <button @onclick="CancelDelete">
+                    Cancel
+                </button>
+            </div>
+
+        </div>
+    }
+
+</div>
 
 @code {
     private List<UserDto>? users;
