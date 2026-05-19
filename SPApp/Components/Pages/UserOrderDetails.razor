@@ -68,19 +68,23 @@
     {
         var token = await SecureStorage.GetAsync("jwt_token");
 
+        // Hvis token er null eller tomt, naviger til login-siden
         if (string.IsNullOrWhiteSpace(token))
         {
             NavigationManager.NavigateTo("/login");
             return;
         }
 
+        // Sæt Authorization header for alle efterfølgende HTTP-anmodninger
         Http.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", token);
 
+        // Hent ordrer for den loggede bruger
         try
         {
             orders = await Http.GetFromJsonAsync<List<OrderDto>>("api/Orders/user");
         }
+        // Hvis der opstår en fejl under indlæsning af ordrer, log fejlen og vis en tom liste
         catch (Exception ex)
         {
             Console.WriteLine("Couldn't load orders: " + ex.Message);

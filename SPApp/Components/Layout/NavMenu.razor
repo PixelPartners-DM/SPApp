@@ -66,6 +66,7 @@
         isLoggedIn = !string.IsNullOrWhiteSpace(token);
     }
 
+    // Det er vigtigt at fjerne event handleren, når komponenten ikke længere er i brug, for at undgå memory leaks
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
