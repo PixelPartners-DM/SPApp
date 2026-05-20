@@ -9,10 +9,14 @@ namespace PixelPalApp.Services
 {
     public class CartService
     {
+        // liste over varer i kurven
         private readonly List<CartItemDto> _Items = new();
+        // synkroniseringsobjekt for tråd-sikker tilgang
         private readonly object _sync = new();
+        // Event som udløses, når kurven ændres (tilføj, opdater, fjern)
         public event Action? CartChanged;
 
+        // Hent en læsbar liste over varer i kurven
         public IReadOnlyList<CartItemDto> GetItems()
         {
             lock (_sync)
@@ -27,16 +31,19 @@ namespace PixelPalApp.Services
             }
         }
 
+        // Hent det samlede antal varer i kurven
         public int GetCount()
         {
             lock (_sync) { return _Items.Count; }
         }
 
+        // Tjek om en vare med det givne produkt-id findes i kurven
         public bool Contains(int productId)
         {
             lock (_sync) { return _Items.Any(i => i.ProductId == productId); }
         }
 
+        // Tilføj en vare til kurven, eller opdater mængden hvis den allerede findes
         public void AddProduct(ProductDto product, int quantity = 1)
         {
             if (product == null || quantity <= 0) return;
@@ -62,6 +69,7 @@ namespace PixelPalApp.Services
             CartChanged?.Invoke();
         }
 
+        // Opdater mængden af en vare i kurven, eller fjern den hvis mængden er 0 eller mindre
         public void UpdateQuantity(int productId, int quantity)
         {
             lock (_sync)
@@ -75,6 +83,7 @@ namespace PixelPalApp.Services
             CartChanged?.Invoke();
         }
 
+        // Fjern en vare fra kurven baseret på produkt-id
         public void Remove(int productId)
         {
             lock (_sync)
@@ -85,6 +94,7 @@ namespace PixelPalApp.Services
             CartChanged?.Invoke();
         }
 
+        // Beregn det samlede beløb for alle varer i kurven
         public decimal GetTotal()
         {
             lock (_sync)
@@ -93,6 +103,7 @@ namespace PixelPalApp.Services
             }
         }
 
+        // Ryd alle varer fra kurven
         public void Clear()
         {
             lock (_sync)

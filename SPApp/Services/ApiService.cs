@@ -80,6 +80,7 @@ namespace PixelPalApp.Services
                     return null;
                 }
 
+                // Alle api-kald automatisk sender token med i headeren
                 _httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);
 
@@ -90,6 +91,7 @@ namespace PixelPalApp.Services
                 var response = await _httpClient.GetAsync("api/user/me");
                 var content = await response.Content.ReadAsStringAsync();
 
+                // Log response status and body for debugging
                 Console.WriteLine($"Status: {response.StatusCode}");
                 Console.WriteLine($"Body: {content}");
 
@@ -302,6 +304,7 @@ namespace PixelPalApp.Services
                     new AuthenticationHeaderValue("Bearer", token);
 
                 //Log serialized request
+                // Skriver order objektet som JSON for at se præcis, hvad der sendes til API'et
                 var json = System.Text.Json.JsonSerializer.Serialize(order);
                 Console.WriteLine("CreateOrder payload: " + json);
 
