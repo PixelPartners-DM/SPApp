@@ -19,6 +19,8 @@ namespace PixelPalApp.Services
         // Hent en læsbar liste over varer i kurven
         public IReadOnlyList<CartItemDto> GetItems()
         {
+            // Lock gør det så den tager en tråd af gangen, så hvis flere tråde prøver at tilgå kurven samtidig, så vil de vente på hinanden.
+            // Hvis jeg ikke brugte lock, kunne det føre til race conditions og ufuldførte data, hvis flere tråde ændrer kurven samtidig.
             lock (_sync)
             {
                 return _Items.Select(i => new CartItemDto
